@@ -27,8 +27,8 @@ window.AMBIENT_CONFIG = {
   nightDim: 0.5,
 
   // Looping video background (replaces the photos). Set to null to go back to photos.
-  // Also available: 'video/fireplace.mp4' (plain fire)
-  video: 'video/christmas-fireplace.mp4',
+  // Also available: 'video/fireplace.mp4' (plain fire). A video set in js/private.js wins.
+  video: (window.AMBIENT_PRIVATE || {}).video || 'video/christmas-fireplace.mp4',
 
   // Extra backgrounds loaded from the internet (any direct image URL).
   // Photos dropped into the /backgrounds folder are picked up by scripts/build-manifest.sh.
