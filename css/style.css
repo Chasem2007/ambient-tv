@@ -1,0 +1,223 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  font-family: 'Inter', 'Samsung One', 'Helvetica Neue', Arial, sans-serif;
+  font-feature-settings: 'cv11', 'ss03';
+  -webkit-font-smoothing: antialiased;
+  cursor: none;
+}
+html { position: fixed; top: 0; left: 0; }
+:focus { outline: none; }
+
+.glass {
+  /* No backdrop blur: re-blurring the moving background every frame makes TV animations choppy. */
+  background: rgba(22, 22, 26, .6);
+  border: 1px solid rgba(255, 255, 255, .09);
+}
+
+/* ---------- Background stage ---------- */
+
+#stage, .layer, #dim { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+/* Clip the zooming layers here: if they overflow, the TV zooms the whole page out and a strip appears right/bottom. */
+#stage, #overlay { overflow: hidden; }
+
+.layer {
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 2.4s ease-in-out;
+  will-change: opacity, transform;
+}
+.layer.active { opacity: 1; }
+.layer.video { object-fit: cover; }
+
+body.motion .layer.kb-0 { animation: kb0 140s ease-in-out infinite alternate; }
+body.motion .layer.kb-1 { animation: kb1 140s ease-in-out infinite alternate; }
+body.motion .layer.kb-2 { animation: kb2 140s ease-in-out infinite alternate; }
+body.motion .layer.kb-3 { animation: kb3 140s ease-in-out infinite alternate; }
+
+@keyframes kb0 { from { transform: scale(1.04) translate(0, 0); }      to { transform: scale(1.14) translate(-2%, -1.5%); } }
+@keyframes kb1 { from { transform: scale(1.14) translate(1.5%, 1%); }  to { transform: scale(1.04) translate(-1%, 0); } }
+@keyframes kb2 { from { transform: scale(1.06) translate(-1.5%, 1%); } to { transform: scale(1.15) translate(1.5%, -1%); } }
+@keyframes kb3 { from { transform: scale(1.12) translate(0, -1.5%); }  to { transform: scale(1.05) translate(0, 1.5%); } }
+
+#dim { background: #000; opacity: 0; transition: opacity 1.2s ease; pointer-events: none; }
+
+/* ---------- Overlay ---------- */
+
+#overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  opacity: 0;
+  transition: opacity .6s ease;
+  pointer-events: none;
+}
+body.info #overlay { opacity: 1; }
+
+#overlay section, .dock { transition: transform .8s cubic-bezier(.2, .8, .2, 1), opacity .4s ease; }
+body:not(.info) .time, body:not(.info) .side { transform: translateY(-16px); }
+body:not(.info) .dock { transform: translateY(24px); }
+
+.scrim { position: absolute; left: 0; width: 100%; }
+.scrim-top    { top: 0;    height: 520px; background: linear-gradient(to bottom, rgba(0,0,0,.5), rgba(0,0,0,0)); }
+.scrim-left   { top: 0; left: 0; width: 1100px; height: 560px; background: radial-gradient(ellipse at 10% 25%, rgba(0,0,0,.38), rgba(0,0,0,0) 70%); }
+.scrim-bottom { bottom: 0; height: 420px; background: linear-gradient(to top,    rgba(0,0,0,.5),  rgba(0,0,0,0)); }
+
+#overlay section { position: absolute; }
+
+/* Time */
+
+.time { top: 88px; left: 112px; text-shadow: 0 1px 3px rgba(0,0,0,.25), 0 2px 30px rgba(0,0,0,.35); }
+#date { font-size: 30px; font-weight: 600; letter-spacing: -.01em; opacity: .92; }
+#clock { line-height: 1; margin: 2px 0 0 -6px; }
+#clock-hm { font-size: 184px; font-weight: 200; letter-spacing: -.035em; }
+#clock-ampm { font-size: 40px; font-weight: 400; margin-left: 14px; opacity: .7; letter-spacing: 0; }
+
+/* Analog style: dial on the left, smaller digital time beside it */
+.time { display: flex; align-items: center; }
+.main-analog { display: none; width: 236px; height: 236px; margin-right: 48px; flex-shrink: 0; }
+body.clock-analog .main-analog { display: block; }
+body.clock-analog #clock { margin: 10px 0 0 -2px; }
+body.clock-analog #clock-hm { font-size: 84px; font-weight: 300; letter-spacing: -.03em; }
+body.clock-analog #clock-ampm { font-size: 30px; margin-left: 10px; }
+body.clock-analog #weather { margin-top: 14px; }
+
+/* Apple Clock widget look; switches to the dark dial with night mode. */
+.analog { --dial: #fff; --ink: #000; --num: #1c1c1e; --tick: #c7c7cc;
+          border-radius: 50%; box-shadow: 0 6px 30px rgba(0,0,0,.35); }
+.analog { text-shadow: none; }
+body.night .analog { --dial: #1c1c1e; --ink: #fff; --num: #f2f2f7; --tick: #48484a; }
+.analog svg { display: block; width: 100%; height: 100%; }
+.analog .face { fill: var(--dial); }
+.analog .tk { stroke: var(--tick); stroke-width: 1.2; stroke-linecap: round; }
+.analog .num { fill: var(--num); font-size: 21px; font-weight: 500; text-anchor: middle; dominant-baseline: central; letter-spacing: -.02em; }
+.analog .stem { stroke: var(--ink); stroke-width: 2.6; }
+.analog .bar { stroke: var(--ink); stroke-width: 7.5; stroke-linecap: round; }
+.analog .m .bar { stroke-width: 6.5; }
+.analog .cap { fill: var(--ink); }
+.analog .s line { stroke: #ff9500; stroke-width: 1.6; stroke-linecap: round; }
+.analog .cap-s { fill: #ff9500; }
+.analog .hole { fill: var(--dial); }
+
+#weather { margin-top: 18px; font-size: 28px; font-weight: 500; opacity: .92; }
+#weather .muted { font-weight: 400; opacity: .75; margin-left: 14px; }
+
+/* Side cards: calendar + scores */
+
+.side { top: 96px; right: 112px; width: 520px; }
+.card { padding: 30px 34px 22px; border-radius: 34px; margin-bottom: 24px; }
+.card-title { font-size: 19px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; opacity: .55; margin-bottom: 6px; }
+.day { font-size: 19px; font-weight: 600; opacity: .55; margin: 18px 0 4px; }
+.day:first-child { margin-top: 10px; }
+.event { display: flex; align-items: stretch; padding: 10px 0; }
+.event .bar { width: 5px; border-radius: 3px; margin-right: 18px; flex-shrink: 0; }
+.event .body { min-width: 0; flex: 1; }
+.event .title { font-size: 27px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.event .when { margin-top: 3px; font-size: 21px; font-weight: 400; opacity: .6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.event .now { display: inline-block; font-size: 15px; font-weight: 700; letter-spacing: .06em; padding: 3px 9px 2px;
+              border-radius: 99px; background: #fff; color: #111; margin-right: 10px; vertical-align: 2px; }
+.event .live { background: #ff453a; color: #fff; }
+.event .stale { opacity: .45; }
+.card-empty { font-size: 24px; font-weight: 400; opacity: .6; padding: 12px 0 10px; }
+
+/* Dock */
+
+.dock {
+  position: absolute; left: 0; right: 0; bottom: 104px;
+  display: flex; justify-content: center; align-items: center;
+}
+
+.tile { position: relative; margin: 0 20px; }
+.tile .face {
+  position: relative; overflow: hidden;
+  width: 248px; height: 116px; border-radius: 28px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: rgba(20,20,24,.42);
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: 0 10px 30px rgba(0,0,0,.18);
+  transition: transform .35s cubic-bezier(.2, .8, .2, 1), box-shadow .35s ease, background .25s ease;
+}
+.tile.focus .face { transform: translateY(-6px) scale(1.1); background: rgba(255,255,255,.24); box-shadow: 0 24px 50px rgba(0,0,0,.35); }
+
+.tile .label {
+  position: absolute; left: -40px; right: -40px; top: 100%; margin-top: 22px;
+  text-align: center; font-size: 22px; font-weight: 500; color: rgba(255,255,255,.8);
+  opacity: 0; transform: translateY(-6px);
+  transition: opacity .25s ease, transform .35s ease;
+  text-shadow: 0 2px 16px rgba(0,0,0,.4);
+}
+.tile.focus .label { opacity: 1; transform: none; }
+
+.wm { font-size: 29px; font-weight: 500; letter-spacing: -.01em; color: rgba(255,255,255,.72); transition: color .25s ease; }
+.tile.focus .wm { color: rgba(255,255,255,.97); }
+.glyph { width: 52px; height: 52px; }
+
+.tile-settings { margin-left: 28px; }
+.tile-settings .face {
+  width: 104px; height: 104px; border-radius: 52px; color: rgba(255,255,255,.75);
+  background: rgba(255,255,255,.16);
+}
+.tile-settings .glyph { width: 44px; height: 44px; }
+.tile-settings.focus .face { background: rgba(255,255,255,.92); color: #111; }
+
+/* ---------- Toast & idle clock ---------- */
+
+#toast {
+  position: absolute; left: 50%; bottom: 96px;
+  padding: 16px 30px; border-radius: 99px;
+  font-size: 24px; font-weight: 500; white-space: nowrap;
+  background: rgba(22, 22, 26, .7);
+  opacity: 0; transform: translate(-50%, 12px);
+  transition: opacity .4s ease, transform .5s cubic-bezier(.2, .8, .2, 1);
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+#toast .muted { opacity: .6; font-weight: 400; margin-left: 10px; }
+body.info #toast { bottom: 330px; }
+
+#idle-clock {
+  position: absolute; font-size: 44px; font-weight: 300; letter-spacing: -.02em; opacity: 0; text-align: center;
+  text-shadow: 0 2px 18px rgba(0,0,0,.4);
+  transition: opacity 1.5s ease, top 3s ease, left 3s ease;
+}
+body.idle-clock:not(.info) #idle-clock { opacity: .55; }
+/* Body uses .idle-dial-on (not .idle-analog) — sharing the name hid the whole page. */
+#idle-clock .idle-analog { display: none; width: 132px; height: 132px; margin: 0 auto 10px; box-shadow: none; }
+body.idle-dial-on #idle-clock { width: 180px; }
+body.idle-dial-on #idle-clock .idle-analog { display: block; }
+body.idle-dial-on #idle-clock { font-size: 28px; opacity: 0; }
+body.idle-dial-on.idle-clock:not(.info) #idle-clock { opacity: .7; }
+
+/* ---------- Settings ---------- */
+
+#settings {
+  position: absolute; top: 50%; right: 112px; width: 600px;
+  padding: 36px 40px 30px;
+  border-radius: 36px;
+  background: rgba(28, 28, 32, .62);
+  box-shadow: 0 30px 80px rgba(0,0,0,.4);
+  opacity: 0;
+  transform: translate(40px, -50%);
+  transition: opacity .45s ease, transform .55s cubic-bezier(.2, .8, .2, 1);
+  pointer-events: none;
+}
+body.settings #settings { opacity: 1; transform: translate(0, -50%); }
+body.settings .side, body.settings .dock { opacity: 0; }
+
+.settings-title { font-size: 19px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; opacity: .55; margin-bottom: 16px; }
+
+.row {
+  display: flex; justify-content: space-between; align-items: center;
+  height: 72px; padding: 0 22px; margin: 0 -22px;
+  border-radius: 18px; font-size: 28px; font-weight: 400;
+  transition: background .2s ease, color .2s ease;
+}
+.row .val { font-weight: 500; opacity: .6; }
+.row .val:before { content: '\2039'; margin-right: 16px; opacity: 0; }
+.row .val:after  { content: '\203A'; margin-left: 16px;  opacity: 0; }
+.row.focus { background: rgba(255,255,255,.94); color: #111; }
+.row.focus .val { opacity: 1; }
+.row.focus .val:before, .row.focus .val:after { opacity: .45; }
