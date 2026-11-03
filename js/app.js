@@ -195,6 +195,19 @@
         '<circle class="hole" cx="100" cy="100" r="1.3"/>' : '') + '</svg>';
   }
 
+  // Faceless dial for the idle clock: 12 bars, white hands, orange-ringed centre.
+  function buildBarDial(el) {
+    var marks = '';
+    for (var i = 0; i < 12; i++) marks += '<line class="bm" x1="100" y1="4" x2="100" y2="27" transform="rotate(' + i * 30 + ' 100 100)"/>';
+    function hand(cls, len) {
+      return '<g class="' + cls + '"><line class="stem" x1="100" y1="100" x2="100" y2="88"/>' +
+        '<line class="bar" x1="100" y1="88" x2="100" y2="' + (100 - len) + '"/></g>';
+    }
+    el.innerHTML = '<svg viewBox="0 0 200 200">' + marks + hand('h', 58) + hand('m', 96) +
+      '<circle class="cap" cx="100" cy="100" r="6"/><circle class="cap-s" cx="100" cy="100" r="3.8"/>' +
+      '<circle class="hole" cx="100" cy="100" r="1.7"/></svg>';
+  }
+
   function setHands(el, d) {
     var sec = d.getSeconds() + d.getMilliseconds() / 1000, min = d.getMinutes() + sec / 60, hr = (d.getHours() % 12) + min / 60;
     el.querySelector('.h').setAttribute('transform', 'rotate(' + hr * 30 + ' 100 100)');
@@ -563,7 +576,7 @@
   keepAwake();
   window.AmbientApps.init();
   buildDial(mainDial, true);
-  buildDial(idleDial, false);
+  buildBarDial(idleDial);
   applySettings();
   renderDock();
   if (cfg.video) startVideo();
